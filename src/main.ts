@@ -8,6 +8,8 @@ import App from './App.vue';
 import 'remixicon/fonts/remixicon.css'
 import { authentificateApp } from './app/authentificate.app';
 
+
+
 const app = createApp(App);
 const pinia = createPinia()
 app.use(router);

@@ -7,6 +7,7 @@ import { usePastsPresidents } from '@/stores/pasts.store';
 import { usePortfolioStore } from '@/stores/portfolio.store';
 import { usePartnerStore } from '@/stores/partner.store';
 import { useBlogStore } from '@/stores/blog.store';
+import { useTeamsStore } from '@/stores/teams.store';
 
 const { toast } = useToast();
 const loading = ref(false);
@@ -77,6 +78,13 @@ const Blogs = async (id: any) => {
       Finaly(useBlogStore().state, id);
    }
 };
+
+const Teams = async (id: any) => {
+   const { data } = await axios.post(URL_RESQUESTS.TEAMS_DELETE, { id });
+   if (data) {
+      Finaly(useTeamsStore().state, id);
+   }
+};
 /**
  * Register
  * @param null
@@ -110,6 +118,10 @@ export const useDeleted = () => {
 
       if (type == 'Blogs') {
          Blogs(id);
+      }
+
+      if(type == 'Teams'){
+         Teams(id)
       }
    };
 
