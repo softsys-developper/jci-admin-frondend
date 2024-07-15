@@ -56,7 +56,9 @@ export const useAuthSignUp = () => {
  * @returns {}
  */
 export const useAuthSign = () => {
-   const state = reactive({});
+   const state = reactive({
+      loading: false
+   });
 
    //
    const formSchema = toTypedSchema(AuthSignInValidate);
@@ -66,14 +68,18 @@ export const useAuthSign = () => {
    });
 
    const SignIn = handleSubmit(async(values) => {
+      state.loading = true
       const { data, error } = await AllService(
          URL_RESQUESTS.AUTH_LOGIN
       ).Created(values, true);
 
       if (data) {
+         state.loading = false
          localStorage.setItem('nToken', data.token);
          location.assign('/');
       } else {
+
+         state.loading = false
          toast({
             title: `${error.response.data?.path}`,
             description: `${error.response.data?.message}`,
@@ -85,7 +91,7 @@ export const useAuthSign = () => {
    //
    const SignOut = () => {
       localStorage.removeItem('nToken');
-      location.assign('/signup');
+      location.assign('/signin');
    };
 
    return {

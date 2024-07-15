@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import SpinnerLoading from '@/components/loadings/spinner.loading.vue';
 import { Button } from '@/components/ui/button';
 import {
    FormControl,
@@ -10,7 +11,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { useAuthSign } from '@/hooks/auth.hook';
 
-const { SignIn } = useAuthSign();
+const { SignIn, state } = useAuthSign();
 </script>
 
 <template>
@@ -20,7 +21,7 @@ const { SignIn } = useAuthSign();
          @submit="SignIn"
       >
 
-      <div >
+      <div class="flex flex-col " >
       <span class="text-3xl font-black">Se Connecter</span>
             <span class="text-lg "> Administration JCI </span>
          </div>
@@ -64,8 +65,8 @@ const { SignIn } = useAuthSign();
         
 
          <div class="pt-4 gap-4 flex">
-            <Button type="submit" class=""> Se Connecter </Button>
-            <Button type="button" class="bg-transparent text-black hover:bg-gray-200"> <RouterLink to="/signup" class="underline text-base" > S'incrire</RouterLink> </Button>
+            <Button type="submit" class=""> <span v-if="!state.loading" > Se Connecter </span> <SpinnerLoading v-else /> </Button>
+            <!-- <Button type="button" class="bg-transparent text-black hover:bg-gray-200"> <RouterLink to="/signup" class="underline text-base" > S'incrire</RouterLink> </Button> -->
          </div>
          
       </form>

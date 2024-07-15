@@ -7,7 +7,8 @@
         :isCreated="true"
       />
 
-      <main class="flex flex-col">
+      
+      <main v-if="!state.loadingPage" class="flex flex-col">
         <!-- Ajouter une image(s) -->
 
         <div class="flex flex-col gap-2">
@@ -87,11 +88,15 @@
               class="bg-gray-800 text-white font-medium px-4 py-1 rounded-md"
               @click="CREATED_ABOUTS"
             >
-              Enregistre
+            <SpinnerLoading v-if="state.loading"  />
+            <span v-else>Enregistre</span>
             </button>
           </div>
         </div>
       </main>
+      <MessageLoading :loading="state.loadingPage" v-else />
+      
+
     </template>
   </BaseLayout>
 </template>
@@ -101,10 +106,9 @@ import BaseLayout from "@/layouts/base.layout.vue";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, reactive } from "vue";
 
 import { URL_RESQUESTS } from "@/api_urls";
-import { useCompagnyStore } from "@/stores/compagny.store";
 import axios from "axios";
 import { useToast } from "@/components/ui/toast/use-toast";
 const { toast } = useToast();
@@ -145,6 +149,11 @@ const Stats = ref([
   },
 ]);
 
+const state = reactive({
+  loading: false,
+  loadingPage: false
+})
+
 const description = ref("");
 const isCountToChange = ref();
 
@@ -170,30 +179,38 @@ const UploadImage = (e, id) => {
 };
 
 import { useFindAll } from "@/hooks/find.hook";
+import SpinnerLoading from "@/components/loadings/spinner.loading.vue";
+import MessageLoading from "@/components/loadings/message.loading.vue";
+import { useCompagnyStore } from "@/stores/compagny.store";
 const { COMPAGNY: Company, FindAll }: any = useFindAll();
 
 const FillFields = () => {
-  //   Images
+  // Images
   console.log("F", Company.value);
   Images.value[0].img = Company.value.about_image_1;
   Images.value[1].img = Company.value.about_image_2;
 
-  //   Stats
+  // Stats
   Stats.value[0].count = Company.value.stats_1 || 1;
   Stats.value[1].count = Company.value.stats_2 || 0;
   Stats.value[2].count = Company.value.stats_3 || 0;
   Stats.value[3].count = Company.value.stats_4 || 0;
 
-  //   Content
+  // Content
   description.value = Company.value.description || "A Propos pas encore define";
 };
 
-onMounted(async () => {
+onMounted( () => {
+  state.loadingPage = true
   if (!Company.value.name) {
     FindAll("compagny", FillFields);
   } else {
     FillFields();
+    state.loadingPage = false
   }
+  setTimeout(() => {
+    state.loadingPage = false
+  }, 1000);
 });
 
 // Created About / Updated
@@ -244,11 +261,21 @@ const CREATED_ABOUTS = async () => {
     //    });
     //  }
     //  return;
-
+    state.loading = true
     const { data } = await axios.post(URL_RESQUESTS.INDEX_UPDATE, dataAbouts);
     if (data) {
-      useCompagnyStore().state.data = data.company;
+      console.log(data.company)
+
+      useCompagnyStore().state.data.stats_1 = data.company.stats_1
+      useCompagnyStore().state.data.stats_2 = data.company.stats_2
+      useCompagnyStore().state.data.stats_3 = data.company.stats_3
+      useCompagnyStore().state.data.stats_4 = data.company.stats_4
+      useCompagnyStore().state.data.about_image_1 = data.company.about_image_1
+      useCompagnyStore().state.data.about_image_2 = data.company.about_image_2
+      useCompagnyStore().state.data.description = data.company.description
+
       ImageAbouts = [];
+      state.loading = false
       toast({
         title: `Modification enregistré`,
         description: "Modifié avec succès",
@@ -256,6 +283,7 @@ const CREATED_ABOUTS = async () => {
     }
   } catch (error) {
     console.log(error);
+    state.loading = false
   }
 };
 </script>
